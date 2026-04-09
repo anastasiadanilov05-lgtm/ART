@@ -1,0 +1,499 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Info, X, ChevronRight, MapPin, Clock, Camera, Menu, Heart, Filter, Landmark } from 'lucide-react';
+
+/**
+ * Baza de date a operelor de artă din Luvru.
+ * Include picturi și sculpturi iconice cu detalii tehnice și locație.
+ */
+const artworksData = [
+  {
+    id: 1,
+    title: "Mona Lisa (La Gioconda)",
+    artist: "Leonardo da Vinci",
+    year: "1503–1506",
+    type: "Pictură",
+    description: "Cea mai faimoasă pictură din lume. Portretul o reprezintă probabil pe Lisa Gherardini, soția unui negustor de mătase venețian. Este celebră pentru tehnica sfumato și privirea care pare să urmărească privitorul.",
+    image: "https://images.unsplash.com/photo-1544735051-9e236592231b?auto=format&fit=crop&q=80&w=1200",
+    category: "Renașterea Italiană",
+    location: "Salla de la Période Italienne, Sala 711",
+    details: "Ulei pe lemn de plop, 77 cm × 53 cm"
+  },
+  {
+    id: 2,
+    title: "Venus din Milo",
+    artist: "Alexandros din Antiohia",
+    year: "cca. 100 î.Hr.",
+    type: "Sculptură",
+    description: "Una dintre cele mai faimoase reprezentări ale frumuseții feminine din Grecia Antică. Sculptura o înfățișează pe Afrodita, zeița greacă a iubirii și frumuseții.",
+    image: "https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=1200",
+    category: "Grecia Antică",
+    location: "Aripa Sully, Sala 345",
+    details: "Marmoră de Paros, Înălțime 202 cm"
+  },
+  {
+    id: 3,
+    title: "Libertatea conducând poporul",
+    artist: "Eugène Delacroix",
+    year: "1830",
+    type: "Pictură",
+    description: "O lucrare monumentală care comemorează Revoluția din Iulie 1830. Figura centrală a Libertății este reprezentată ca o femeie a poporului, purtând drapelul tricolor.",
+    image: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=1200",
+    category: "Romantism",
+    location: "Aripa Denon, Sala 700",
+    details: "Ulei pe pânză, 260 cm × 325 cm"
+  },
+  {
+    id: 4,
+    title: "Victoria înaripată din Samotrace",
+    artist: "Necunoscut",
+    year: "cca. 190 î.Hr.",
+    type: "Sculptură",
+    description: "O capodoperă a sculpturii elenistice, reprezentând-o pe zeița Nike. A fost creată pentru a celebra o victorie navală și este amplasată pe scara monumentală Daru.",
+    image: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?auto=format&fit=crop&q=80&w=1200",
+    category: "Grecia Antică",
+    location: "Scara Daru, Aripa Denon",
+    details: "Marmoră albă de Paros, Înălțime 328 cm"
+  },
+  {
+    id: 5,
+    title: "Pluta Meduzei",
+    artist: "Théodore Géricault",
+    year: "1818–1819",
+    type: "Pictură",
+    description: "Înfațișează urmările naufragiului fregatei franceze Méduse. Este o icoană a Romantismului francez, explorând suferința umană și disperarea cu un realism șocant.",
+    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=1200",
+    category: "Romantism",
+    location: "Aripa Denon, Sala 700",
+    details: "Ulei pe pânză, 491 cm × 716 cm"
+  },
+  {
+    id: 6,
+    title: "Scribul ghemuit",
+    artist: "Necunoscut",
+    year: "2600–2350 î.Hr.",
+    type: "Sculptură",
+    description: "Una dintre cele mai importante piese ale departamentului de Antichități Egiptene. Realismul chipului și al privirii este excepțional pentru perioada Vechiului Imperiu.",
+    image: "https://images.unsplash.com/photo-1618172193622-ae2d025f4032?auto=format&fit=crop&q=80&w=1200",
+    category: "Egiptul Antic",
+    location: "Aripa Sully, Sala 635",
+    details: "Calcar pictat, ochi din cristal de stâncă"
+  },
+  {
+    id: 7,
+    title: "Încoronarea lui Napoleon",
+    artist: "Jacques-Louis David",
+    year: "1805–1807",
+    type: "Pictură",
+    description: "O pânză colosală care documentează momentul în care Napoleon I este încoronat la Notre-Dame de Paris. O lucrare monumentală a neoclasicismului francez.",
+    image: "https://images.unsplash.com/photo-1576402187878-974f70c890a5?auto=format&fit=crop&q=80&w=1200",
+    category: "Neoclasicism",
+    location: "Aripa Denon, Sala 702",
+    details: "Ulei pe pânză, 621 cm × 979 cm"
+  },
+  {
+    id: 8,
+    title: "Psihé reanimată de sărutul lui Cupidon",
+    artist: "Antonio Canova",
+    year: "1787",
+    type: "Sculptură",
+    description: "O capodoperă a sculpturii neoclasice. Reprezintă momentul în care zeul Iubirii o trezește pe muritoarea Psihé dintr-un somn magic cu un sărut plin de tandrețe.",
+    image: "https://images.unsplash.com/photo-1554188248-986adbb73be4?auto=format&fit=crop&q=80&w=1200",
+    category: "Neoclasicism",
+    location: "Aripa Denon, Sala 403",
+    details: "Marmoră, 155 cm × 168 cm"
+  },
+  {
+    id: 9,
+    title: "Nunta din Cana",
+    artist: "Paolo Veronese",
+    year: "1563",
+    type: "Pictură",
+    description: "Cea mai mare pictură din Luvru, reprezentând miracolul biblic al transformării apei în vin într-un decor somptuos al Veneției secolului XVI.",
+    image: "https://images.unsplash.com/photo-1578321271374-d4648703c307?auto=format&fit=crop&q=80&w=1200",
+    category: "Renașterea Venețiană",
+    location: "Aripa Denon, Sala 711",
+    details: "Ulei pe pânză, 677 cm × 994 cm"
+  }
+];
+
+export default function App() {
+  // Starea pentru filtre și UI
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("Toate");
+  const [activeType, setActiveType] = useState("Toate");
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Detectăm scroll-ul pentru header
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Categorii unice extrase din date
+  const categories = useMemo(() => ["Toate", ...new Set(artworksData.map(a => a.category))], []);
+  const types = ["Toate", "Pictură", "Sculptură"];
+
+  // Logică de filtrare combinată
+  const filteredArtworks = useMemo(() => {
+    return artworksData.filter(a => {
+      const matchesSearch = a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            a.artist.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = activeCategory === "Toate" || a.category === activeCategory;
+      const matchesType = activeType === "Toate" || a.type === activeType;
+      return matchesSearch && matchesCategory && matchesType;
+    });
+  }, [searchTerm, activeCategory, activeType]);
+
+  // Handler pentru închiderea modalei la tasta Escape
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") setSelectedArtwork(null);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[#faf9f6] text-[#1c1c1c] font-serif selection:bg-stone-200 antialiased">
+      
+      {/* Navigation - Transparentă inițial, devine opacă la scroll */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 px-6 py-4 ${
+        isScrolled ? "bg-white shadow-md py-3" : "bg-transparent text-white"
+      }`}>
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div 
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <div className={`w-10 h-10 border-2 flex items-center justify-center font-bold transition-all duration-300 group-hover:bg-current group-hover:text-stone-900 ${isScrolled ? "border-stone-900" : "border-white"}`}>L</div>
+            <div className="flex flex-col">
+              <span className="text-xl tracking-[0.3em] font-light uppercase leading-none">Louvre</span>
+              <span className="text-[9px] tracking-[0.1em] opacity-60 font-sans uppercase">Musée Numérique</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-8">
+            <div className={`relative hidden lg:flex items-center border-b pb-1 transition-colors ${isScrolled ? "border-stone-300" : "border-white/30"}`}>
+              <Search className={`w-4 h-4 mr-2 ${isScrolled ? "text-stone-400" : "text-white/70"}`} />
+              <input 
+                type="text" 
+                placeholder="Căutați o operă..."
+                className="bg-transparent border-none outline-none text-sm w-64 placeholder:italic placeholder:font-light"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Menu className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity" />
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section - Prezentare vizuală */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-stone-950">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1491156855053-9cdff72c7f85?auto=format&fit=crop&q=80&w=2000" 
+            alt="Interior Muzeul Luvru" 
+            className="w-full h-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/20 to-stone-950/40" />
+        </div>
+        
+        <div className="relative z-10 text-center px-4 max-w-5xl">
+          <div className="mb-8 flex justify-center items-center gap-4 text-white/60 text-[10px] tracking-[0.5em] uppercase font-sans">
+            <div className="w-12 h-px bg-white/30" />
+            Capodoperele Umanității
+            <div className="w-12 h-px bg-white/30" />
+          </div>
+          <h1 className="text-6xl md:text-9xl text-white font-extralight tracking-tighter mb-10 leading-[0.9] animate-fade-in-up">
+            Colecția <br/> <span className="italic font-normal serif">Regală</span>
+          </h1>
+          <p className="text-white/70 max-w-xl mx-auto mb-12 text-lg font-light leading-relaxed italic animate-fade-in delay-500">
+            O incursiune digitală în inima celui mai mare muzeu din lume, de la antichitatea egipteană la romantismul francez.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-6 animate-fade-in delay-700">
+            <button 
+              onClick={() => window.scrollTo({ top: window.innerHeight - 100, behavior: 'smooth' })}
+              className="px-10 py-4 bg-white text-stone-900 uppercase tracking-widest text-[10px] font-bold hover:bg-stone-200 transition-all rounded-sm shadow-xl"
+            >
+              Explorați Galeria
+            </button>
+          </div>
+        </div>
+        
+        <div 
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/40 cursor-pointer animate-bounce"
+          onClick={() => window.scrollTo({ top: window.innerHeight - 100, behavior: 'smooth' })}
+        >
+          <ChevronRight className="rotate-90 w-8 h-8" />
+        </div>
+      </section>
+
+      {/* Interfața de Control (Sticky) */}
+      <section className="sticky top-[72px] z-40 bg-white/95 backdrop-blur-md border-b border-stone-100 shadow-sm overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col xl:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-8 w-full xl:w-auto">
+            <div className="flex items-center gap-3 text-stone-400 flex-shrink-0">
+              <Filter className="w-4 h-4" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Filtrare:</span>
+            </div>
+            
+            <div className="flex gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1">
+              {/* Filtre după Tip */}
+              <div className="flex gap-2 mr-4">
+                {types.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setActiveType(t)}
+                    className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all border ${
+                      activeType === t 
+                      ? "bg-stone-900 border-stone-900 text-white shadow-lg" 
+                      : "bg-transparent border-stone-200 text-stone-400 hover:border-stone-400"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <div className="w-px h-6 bg-stone-200 mx-1 self-center hidden md:block" />
+              {/* Filtre după Categorie */}
+              <div className="flex gap-2">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all border whitespace-nowrap ${
+                      activeCategory === cat 
+                      ? "bg-stone-900 border-stone-900 text-white shadow-lg" 
+                      : "bg-transparent border-stone-200 text-stone-400 hover:border-stone-400"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="text-stone-300 text-[10px] tracking-[0.2em] uppercase font-sans flex-shrink-0">
+            Rezultate: <span className="text-stone-900 font-bold">{filteredArtworks.length} piese</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Grid-ul de Opere de Artă */}
+      <section className="max-w-7xl mx-auto px-6 py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+          {filteredArtworks.length > 0 ? (
+            filteredArtworks.map((artwork) => (
+              <div 
+                key={artwork.id}
+                className="group cursor-pointer flex flex-col"
+                onClick={() => setSelectedArtwork(artwork)}
+              >
+                <div className="relative mb-8 overflow-hidden bg-stone-100 aspect-[3/4.5] shadow-xl transition-all duration-700 hover:shadow-2xl">
+                  <img 
+                    src={artwork.image} 
+                    alt={artwork.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:brightness-90"
+                  />
+                  {/* Overlay la hover */}
+                  <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 transition-colors duration-500" />
+                  <div className="absolute top-6 left-6 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform -translate-x-4 group-hover:translate-x-0">
+                    <span className="bg-white/95 backdrop-blur-sm text-stone-900 text-[8px] font-bold px-3 py-1 rounded-sm uppercase tracking-widest">
+                      {artwork.type}
+                    </span>
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-stone-950/80 to-transparent">
+                    <p className="text-white text-[10px] tracking-[0.2em] uppercase opacity-70 mb-2">Vizualizați detalii</p>
+                    <div className="w-10 h-px bg-white/50" />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-stone-400 mb-3 flex items-center gap-2">
+                    <div className="w-4 h-px bg-stone-300" /> {artwork.artist}
+                  </span>
+                  <h3 className="text-2xl font-light mb-2 leading-tight tracking-tight group-hover:text-stone-600 transition-colors">
+                    {artwork.title}
+                  </h3>
+                  <div className="flex items-center justify-between mt-auto">
+                    <p className="text-xs text-stone-400 italic">{artwork.year}</p>
+                    <span className="text-[10px] text-stone-300 font-sans tracking-widest">{artwork.category}</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full py-32 text-center border border-dashed border-stone-200 rounded-lg">
+              <Landmark className="w-12 h-12 text-stone-200 mx-auto mb-6" />
+              <h4 className="text-2xl font-light text-stone-400 italic">Căutarea nu a returnat niciun rezultat</h4>
+              <p className="text-[10px] text-stone-300 mt-2 uppercase tracking-widest">Resetați filtrele pentru a vedea întreaga colecție</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Footer Informațional */}
+      <footer className="bg-stone-950 text-stone-500 pt-24 pb-12 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center gap-3 mb-10">
+              <div className="w-8 h-8 border border-stone-800 flex items-center justify-center font-bold text-white">L</div>
+              <span className="text-xl tracking-widest text-white uppercase font-light">Louvre</span>
+            </div>
+            <p className="text-sm leading-relaxed mb-8 max-w-sm">
+              Luvrul este mai mult decât un muzeu; este o cetate a istoriei umane, adăpostind peste 35.000 de opere expuse în 73.000 de metri pătrați.
+            </p>
+          </div>
+          
+          <div>
+            <h4 className="text-white text-[10px] tracking-[0.3em] uppercase mb-10">Vizită Virtuală</h4>
+            <ul className="space-y-4 text-[10px] tracking-widest uppercase">
+              <li className="hover:text-white cursor-pointer transition-colors">Aripa Denon</li>
+              <li className="hover:text-white cursor-pointer transition-colors">Aripa Sully</li>
+              <li className="hover:text-white cursor-pointer transition-colors">Aripa Richelieu</li>
+              <li className="hover:text-white cursor-pointer transition-colors">Grădinile Tuileries</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white text-[10px] tracking-[0.3em] uppercase mb-10">Contact</h4>
+            <ul className="space-y-4 text-xs">
+              <li className="flex gap-3"><MapPin className="w-4 h-4 text-stone-800" /> Rue de Rivoli, Paris, Franța</li>
+              <li className="flex gap-3"><Clock className="w-4 h-4 text-stone-800" /> 09:00 - 18:00 (Marți Închis)</li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto border-t border-stone-900 pt-8 text-[9px] tracking-[0.4em] uppercase text-center md:text-left">
+          © {new Date().getFullYear()} MUSÉE DU LOUVRE - PLATFORMĂ DE EXPLORARE DIGITALĂ
+        </div>
+      </footer>
+
+      {/* Modal Detalii Operă */}
+      {selectedArtwork && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden p-0 md:p-6">
+          {/* Fundal Modala */}
+          <div 
+            className="absolute inset-0 bg-stone-950/98 backdrop-blur-xl animate-fade-in"
+            onClick={() => setSelectedArtwork(null)}
+          ></div>
+          
+          <div className="relative bg-white w-full max-w-7xl h-full lg:h-[90vh] overflow-y-auto lg:rounded-sm flex flex-col lg:flex-row shadow-2xl animate-modal-slide-in">
+            {/* Buton Închidere */}
+            <button 
+              className="absolute top-6 right-6 z-[110] p-4 bg-stone-100 hover:bg-stone-900 hover:text-white rounded-full transition-all group"
+              onClick={() => setSelectedArtwork(null)}
+              aria-label="Închide fereastra"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Secțiune Imagine (Stânga) */}
+            <div className="w-full lg:w-[60%] h-[50vh] lg:h-full bg-stone-50 flex items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-stone-100">
+              <img 
+                src={selectedArtwork.image} 
+                alt={selectedArtwork.title} 
+                className="max-w-full max-h-full object-contain shadow-2xl hover:scale-[1.02] transition-transform duration-500"
+              />
+            </div>
+            
+            {/* Secțiune Conținut (Dreapta) */}
+            <div className="w-full lg:w-[40%] p-10 md:p-16 flex flex-col bg-white">
+              <div className="mb-12">
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="px-3 py-1 bg-stone-900 text-white text-[9px] uppercase tracking-[0.3em] font-sans font-bold">
+                    {selectedArtwork.type}
+                  </span>
+                  <span className="text-stone-300 text-[9px] uppercase tracking-[0.3em] font-sans">
+                    {selectedArtwork.category}
+                  </span>
+                </div>
+                
+                <h2 className="text-5xl md:text-6xl font-extralight mb-6 leading-none tracking-tighter text-stone-900">
+                  {selectedArtwork.title}
+                </h2>
+                <div className="flex items-baseline gap-4 mb-8">
+                  <p className="text-2xl text-stone-400 italic font-light">{selectedArtwork.artist}</p>
+                  <span className="w-1.5 h-1.5 bg-stone-200 rounded-full" />
+                  <p className="text-sm text-stone-300 font-sans tracking-widest">{selectedArtwork.year}</p>
+                </div>
+              </div>
+              
+              <div className="flex-grow space-y-12">
+                <div>
+                  <h5 className="flex items-center gap-3 text-[10px] font-bold tracking-[0.4em] text-stone-900 mb-6 uppercase">
+                    <Info className="w-4 h-4" /> Despre Capodoperă
+                  </h5>
+                  <p className="text-stone-600 leading-relaxed text-xl font-light">
+                    {selectedArtwork.description}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8 py-8 border-y border-stone-100">
+                  <div className="space-y-3">
+                    <h6 className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-300">Tehnică & Material</h6>
+                    <p className="text-sm text-stone-800 leading-tight">{selectedArtwork.details}</p>
+                  </div>
+                  <div className="space-y-3">
+                    <h6 className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-300">Locație în Muzeu</h6>
+                    <p className="text-sm text-stone-800 flex items-start gap-2">
+                      <MapPin className="w-4 h-4 text-stone-400 flex-shrink-0" /> {selectedArtwork.location}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <button className="w-full py-5 bg-stone-900 text-white hover:bg-stone-800 transition-all flex items-center justify-center gap-4 tracking-[0.3em] uppercase text-[10px] font-bold shadow-lg">
+                    Planificați un tur ghidat <ChevronRight className="w-4 h-4" />
+                  </button>
+                  <div className="flex justify-between items-center text-[9px] text-stone-400 tracking-widest uppercase font-sans">
+                    <div className="flex items-center gap-2">
+                      <Camera className="w-3.5 h-3.5" /> Fotografiat fără bliț
+                    </div>
+                    <span>Cod: INV-2024-{selectedArtwork.id}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stiluri Globale Animații */}
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes modal-slide-in {
+          from { opacity: 0; transform: scale(0.95) translateY(50px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-out forwards;
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-modal-slide-in {
+          animation: modal-slide-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-700 { animation-delay: 700ms; }
+      `}</style>
+    </div>
+  );
+}
